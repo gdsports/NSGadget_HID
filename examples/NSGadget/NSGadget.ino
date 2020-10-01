@@ -1,4 +1,27 @@
 /*
+ * MIT License
+ *
+ * Copyright (c) 2020 gdsports625@gmail.com
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+/*
  * Nintendo Switch Gamepad Gadget
  *
  * Emulate a Nintendo Switch compatible USB Gamepad (Hori HoriPAD) on the USB
@@ -28,7 +51,24 @@
  *
  * The NSGamepad library is in my fork of NicoHood's HID library.
  */
-#include "HID-Project.h"  // https://github.com/gdsports/HID/tree/horipad
+
+#define HAS_DOTSTAR_LED (defined(ADAFRUIT_TRINKET_M0) || defined(ADAFRUIT_ITSYBITSY_M0) || defined(ADAFRUIT_ITSYBITSY_M4_EXPRESS))
+#if HAS_DOTSTAR_LED
+#include <Adafruit_DotStar.h>
+#if defined(ADAFRUIT_ITSYBITSY_M4_EXPRESS)
+#define DATAPIN    8
+#define CLOCKPIN   6
+#elif defined(ADAFRUIT_ITSYBITSY_M0)
+#define DATAPIN    41
+#define CLOCKPIN   40
+#elif defined(ADAFRUIT_TRINKET_M0)
+#define DATAPIN    7
+#define CLOCKPIN   8
+#endif
+Adafruit_DotStar strip = Adafruit_DotStar(1, DATAPIN, CLOCKPIN, DOTSTAR_BRG);
+#endif
+
+#include "HID-Project.h"  // https://github.com/NicoHood/HID
 
 // On SAMD boards where the native USB port is also the serial console, use
 // Serial1 for the serial console. This applies to all SAMD boards except for
@@ -60,14 +100,6 @@
 #define dbprint(...)
 #define dbprintln(...)
 #define dbwrite(...)
-#endif
-
-#ifdef ADAFRUIT_TRINKET_M0
-// setup Dotstar LED on Trinket M0
-#include <Adafruit_DotStar.h>
-#define DATAPIN    7
-#define CLOCKPIN   8
-Adafruit_DotStar strip = Adafruit_DotStar(1, DATAPIN, CLOCKPIN, DOTSTAR_BRG);
 #endif
 
 uint32_t elapsed_mSecs(uint32_t last_millis)
@@ -190,7 +222,7 @@ void setup()
   dbbegin( 115200 );
   dbprintln("NSGadget setup");
 
-#ifdef ADAFRUIT_TRINKET_M0
+#if HAS_DOTSTAR_LED
   // Turn off built-in Dotstar RGB LED
   strip.begin();
   strip.clear();
