@@ -20,8 +20,6 @@ git clone https://github.com/NicoHood/HID ${ARDUINO_DIRECTORIES_USER}/libraries/
 ln -sf $MYPROJECT_SRC/SingleReport/* $HID_PROJECT/SingleReport
 ln -sf $MYPROJECT_SRC/HID-APIs/* $HID_PROJECT/HID-APIs
 sed -i '/^#include "SingleReport\/SingleGamepad.h"/a #include "SingleReport/SingleNSGamepad.h"' $HID_PROJECT/HID-Project.h
-# Fix VID/PID
-find ${ARDUINO_DIRECTORIES_DATA} -name boards.txt -print0 | xargs -0 sed -i 's/^adafruit_trinket_m0.build.vid=0x239A$/adafruit_trinket_m0.build.vid=0x0f0d/;s/^adafruit_trinket_m0.build.pid=0x801E$/adafruit_trinket_m0.build.pid=0x00c1/'
 # Disable CDC ACM
 find ${ARDUINO_DIRECTORIES_DATA} -name USBDesc.h -print0 | xargs -0 sed -i 's/^#define.*CDC_ENABLED.*$/\/\/#define CDC_ENABLED/'
 # Fix USB class/subclass/protocol
@@ -31,7 +29,8 @@ BOARDS=('adafruit:samd:adafruit_trinket_m0' 'adafruit:samd:adafruit_itsybitsy_m0
 for board in "${BOARDS[@]}" ; do
     export ARDUINO_BOARD_FQBN=${board}
     ARDUINO_BOARD_FQBN2=${ARDUINO_BOARD_FQBN//:/.}
-    find ${MYPROJECT_EXAMPLES} -name '*.ino' -print0 | xargs -0 -n 1 arduino-cli compile --fqbn ${board}
+    arduino-cli cache clean
+    find ${MYPROJECT_EXAMPLES} -name '*.ino' -print0 | xargs -0 -n 1 arduino-cli compile --fqbn ${board} --verbose --build-properties build.vid=0x0f0d,build.pid=0x00c1
     # Convert all BIN to UF2 for drag-and-drop burning on boards with UF2 boot loader
     for MYSKETCH in ${MYPROJECT_EXAMPLES}/* ; do
         pushd ${MYSKETCH}/build/${ARDUINO_BOARD_FQBN2}
@@ -51,4 +50,4 @@ for board in "${BOARDS[@]}" ; do
         mv *.ino.bin.uf2 ${FIRMWARE}
         popd
     done
-done 2>errors
+done >errors 2>&1
