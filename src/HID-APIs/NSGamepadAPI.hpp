@@ -49,7 +49,7 @@ void NSGamepadAPI::loop(void){
   else {
     deltaMillis = ((0xFFFFFFFFUL - startMillis) + endMillis);
   }
-  if (deltaMillis >= 7) {
+  if (deltaMillis >= 1) {
     write();
     startMillis = millis();
   }

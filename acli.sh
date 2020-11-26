@@ -20,7 +20,7 @@ git clone https://github.com/NicoHood/HID ${ARDUINO_DIRECTORIES_USER}/libraries/
 ln -sf $MYPROJECT_SRC/SingleReport/* $HID_PROJECT/SingleReport
 ln -sf $MYPROJECT_SRC/HID-APIs/* $HID_PROJECT/HID-APIs
 sed -i '/^#include "SingleReport\/SingleGamepad.h"/a #include "SingleReport/SingleNSGamepad.h"' $HID_PROJECT/HID-Project.h
-# Disable CDC ACM
+# Disable CDC ACM (USB Serial)
 find ${ARDUINO_DIRECTORIES_DATA} -name USBDesc.h -print0 | xargs -0 sed -i 's/^#define.*CDC_ENABLED.*$/\/\/#define CDC_ENABLED/'
 # Fix USB class/subclass/protocol
 find ${ARDUINO_DIRECTORIES_DATA} -name USBCore.cpp -print0 | xargs -0 sed -i -e 's/bool _cdcComposite.*;/bool _cdcComposite = false;/;/if (setup.wLength == 8)/i #ifdef CDC_ENABLED' -e '/_cdcComposite = 1/a #endif'

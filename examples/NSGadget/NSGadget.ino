@@ -239,6 +239,7 @@ void loop()
   if ((reportLen > 1) && (nsData[1] == 2)) {
     NSGamepad.write(&nsData[2]);
   }
-
-  NSGamepad.loop();
+  else {
+    NSGamepad.loop();
+  }
 }
